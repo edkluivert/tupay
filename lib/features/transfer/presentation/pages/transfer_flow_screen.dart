@@ -211,14 +211,14 @@ class _TransferFlowViewState extends State<_TransferFlowView>
           _pageController.jumpToPage(state.step.index);
         }
 
-        if (state.isFailure) {
+        if (state.isFailure && state.message != null) {
           AppSnackBar.showFailure(
             context,
             message: state.message ?? 'Unable to continue.',
           );
         }
 
-        if (state.isSuccess) {
+        if (state.isSuccess && state.message != null) {
           AppSnackBar.showSuccess(
             context,
             message: state.message ?? 'Transfer submitted.',

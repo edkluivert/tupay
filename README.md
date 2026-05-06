@@ -8,10 +8,10 @@ The app was designed to demonstrate high-performance engineering, smooth user ex
 
 We focused on bringing the UI to life while keeping performance smooth and adding essential security elements:
 
-1. **Super Smooth Scrolling**: The balance card on the dashboard smoothly shrinks and stays pinned to the top as you scroll. We built this natively so the app stays at a buttery smooth 120 frames per second.
+1. **Super Smooth Scrolling**: The balance card on the dashboard smoothly shrinks and stays pinned to the top as you scroll.  
 2. **Resume Where You Left Off**: If your phone needs memory and silently closes the app while you're in the middle of a transfer, don't worry! When you open it again, it brings you right back to the exact step with all the details you already typed. 
 3. **Secure Background Blur**: Whenever you switch apps or minimize Tupay, a privacy blur and lock icon automatically cover the screen to protect your financial details from prying eyes.
-4. **Secure Data Storage**: Whenever you finish a transfer, the transaction ID is safely stored using your phone's built-in secure storage (like Keychain on iOS).
+4. **Secure Data Storage**: Whenever you finish a transfer, the transaction ID is safely stored using your phone's built-in secure storage.
 5. **No Lag on Big Data**: We created a background process to handle massive amounts of data (like loading a heavy 5MB list of 50,000 transactions). Because this heavy lifting happens in the background, the app never freezes or lags.
 
 ## 👤 Test Users (Dummy Accounts)
@@ -42,3 +42,4 @@ To run the automated tests:
 ```bash
 flutter test
 ```
+

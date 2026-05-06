@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tupay/common/widgets/bouncing_clickable.dart';
-import 'package:tupay/core/extensions/other_extensions.dart';
 import 'package:tupay/core/injections/injection.dart';
 import 'package:tupay/features/auth/presentation/state_manager/reset_password/reset_password_cubit.dart';
 import 'package:tupay/features/auth/presentation/state_manager/reset_password/reset_password_state.dart';
@@ -70,7 +66,11 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
             message: state.message ?? 'Password updated!',
           );
 
-          sl<NavigationService>().removeAllAndNavigateTo(Routes.login);
+          WidgetsBinding.instance.addPostFrameCallback((_){
+            sl<NavigationService>().removeAllAndNavigateTo(Routes.login);
+          });
+
+
         }
       },
       builder: (context, state) {

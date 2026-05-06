@@ -7,7 +7,6 @@ enum TransferStep { amount, recipient, review }
 
 enum PaymentMethodType { tupayBalance, applePay, googlePay }
 
-
 class PaymentMethodOption {
   const PaymentMethodOption({
     required this.type,
@@ -35,8 +34,6 @@ class MockContact {
   final String initials;
   final Color color;
 }
-
-
 
 sealed class TransferFlowState {
   const TransferFlowState({
@@ -153,7 +150,7 @@ sealed class TransferFlowState {
     if (_parsedAmount == 0) return '';
 
     final converted = _parsedAmount * exchangeRate;
-    return converted.toStringAsFixed(2);
+    return _formatAmount(converted);
   }
 
   String get exchangeRateText {
@@ -231,7 +228,6 @@ sealed class TransferFlowState {
   });
 }
 
-
 final class TransferFlowInitial extends TransferFlowState {
   const TransferFlowInitial()
       : super(
@@ -267,7 +263,7 @@ final class TransferFlowInitial extends TransferFlowState {
       pendingTransactionId: clearPendingTransactionId
           ? null
           : pendingTransactionId ?? this.pendingTransactionId,
-      message: clearMessage ? null : message ?? this.message,
+      message: clearMessage ? null : (message ?? this.message),
     );
   }
 }
@@ -308,7 +304,7 @@ final class TransferFlowIdle extends TransferFlowState {
       pendingTransactionId: clearPendingTransactionId
           ? null
           : pendingTransactionId ?? this.pendingTransactionId,
-      message: clearMessage ? null : message ?? this.message,
+      message: clearMessage ? null : (message ?? this.message),
     );
   }
 }
@@ -364,6 +360,7 @@ final class TransferFlowSuccess extends TransferFlowState {
     super.message,
   });
 
+
   @override
   TransferFlowState copyWith({
     TransferStep? step,
@@ -377,7 +374,7 @@ final class TransferFlowSuccess extends TransferFlowState {
     bool clearMessage = false,
     String? message,
   }) {
-    return TransferFlowSuccess(
+    return TransferFlowIdle(
       step: step ?? this.step,
       sendAmount: sendAmount ?? this.sendAmount,
       recipientName: recipientName ?? this.recipientName,
@@ -388,7 +385,7 @@ final class TransferFlowSuccess extends TransferFlowState {
       pendingTransactionId: clearPendingTransactionId
           ? null
           : pendingTransactionId ?? this.pendingTransactionId,
-      message: clearMessage ? null : message ?? this.message,
+      message: clearMessage ? null : (message ?? this.message),
     );
   }
 }
@@ -418,7 +415,7 @@ final class TransferFlowFailure extends TransferFlowState {
     bool clearMessage = false,
     String? message,
   }) {
-    return TransferFlowFailure(
+    return TransferFlowIdle(
       step: step ?? this.step,
       sendAmount: sendAmount ?? this.sendAmount,
       recipientName: recipientName ?? this.recipientName,
@@ -429,7 +426,7 @@ final class TransferFlowFailure extends TransferFlowState {
       pendingTransactionId: clearPendingTransactionId
           ? null
           : pendingTransactionId ?? this.pendingTransactionId,
-      message: clearMessage ? null : message ?? this.message,
+      message: clearMessage ? null : (message ?? this.message),
     );
   }
 }

@@ -49,7 +49,10 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
   }
 
   void _goToResetPassword() {
-    navigationService.clearLastAndNavigateTo(Routes.resetPassword);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigationService.clearLastAndNavigateTo(Routes.resetPassword);
+    });
+
   }
 
   void _backToLogin() {

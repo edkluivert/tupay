@@ -51,6 +51,7 @@ class NavigationService {
     );
   }
 
+
   Future<dynamic> removeAllAndNavigateTo(
     String routeName, {
     Object? arguments,

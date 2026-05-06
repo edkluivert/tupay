@@ -86,6 +86,7 @@ class TransferFlowCubit extends Cubit<TransferFlowState> {
       state.copyWith(
         recipientAccount: value,
         clearMessage: true,
+
       ),
     );
   }

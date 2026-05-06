@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:tupay/core/extensions/other_extensions.dart';
 import 'package:tupay/features/features.dart';
 
 class SplashScreen extends StatefulWidget {

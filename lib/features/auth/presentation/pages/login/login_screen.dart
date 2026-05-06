@@ -64,7 +64,9 @@ class _LoginViewState extends State<_LoginView> {
     sl<SharedPreferencesWrapper>().setString(SharedPrefsKey.firstTimer,
         'first_timer');
 
-    sl<NavigationService>().removeAllAndNavigateTo(Routes.appBottomNav);
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      sl<NavigationService>().removeAllAndNavigateTo(Routes.appBottomNav);
+    });
   }
 
   @override
