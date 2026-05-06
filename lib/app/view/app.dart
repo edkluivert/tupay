@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:secure_application/secure_application.dart';
+import 'package:tupay/app/view/secure_app_gate.dart';
 import 'package:tupay/core/constants/app_colors.dart';
 import 'package:tupay/core/injections/injection.dart';
 import 'package:tupay/core/navigation/navigation_service.dart';
@@ -31,7 +32,7 @@ class _AppState extends State<App> {
   Timer? _navigationTimer;
   bool _hasNavigated = false;
 
-  static const _splashDelay = Duration(seconds: 4);
+  static const _splashDelay = Duration(seconds: 3);
 
   @override
   void initState() {
@@ -99,35 +100,23 @@ class _AppState extends State<App> {
             systemNavigationBarColor: AppColors.secondaryColor,
             systemNavigationBarIconBrightness: Brightness.light,
           ),
-          child: SecureApplication(
-            child: MaterialApp(
-              title: 'TuPay',
-              theme: TupayTheme.createLightThemeData(),
-              onGenerateRoute: generateRoute,
-              onUnknownRoute: generateRoute,
-              navigatorKey: navigatorService.navigationKey,
-              debugShowCheckedModeBanner: false,
-              restorationScopeId: 'tupay_app',
-              home: const SplashScreen(),
-
-              builder: (context, child) {
-                return SecureGate(
-                  blurr: 10,
-                  opacity: 0.5,
-                  lockedBuilder: (context, secureNotifier) => Container(
-                    color: AppColors.primaryColor,
-                    child: const Center(
-                      child: Icon(
-                        Icons.lock_outline,
-                        size: 48,
-                        color: AppColors.secondaryColor,
-                      ),
-                    ),
-                  ),
+          child: MaterialApp(
+            title: 'TuPay',
+            theme: TupayTheme.createLightThemeData(),
+            onGenerateRoute: generateRoute,
+            onUnknownRoute: generateRoute,
+            navigatorKey: navigatorService.navigationKey,
+            debugShowCheckedModeBanner: false,
+            restorationScopeId: 'tupay_app',
+            home: const SplashScreen(),
+            builder: (context, child) {
+              return SecureApplication(
+                nativeRemoveDelay: 800,
+                child: SecureAppGate(
                   child: child ?? const SizedBox.shrink(),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),

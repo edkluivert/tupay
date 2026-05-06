@@ -1,9 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:tupay/common/widgets/bouncing_clickable.dart';
 import 'package:tupay/common/widgets/clickable_widget.dart';
+import 'package:tupay/core/handlers/shared_preferences_wrapper.dart';
 import 'package:tupay/core/injections/injection.dart';
 import 'package:tupay/features/auth/presentation/state_manager/login/login_cubit.dart';
 import 'package:tupay/features/auth/presentation/state_manager/login/login_state.dart';
@@ -62,6 +60,13 @@ class _LoginViewState extends State<_LoginView> {
     navigationService.clearLastAndNavigateTo(Routes.signup);
   }
 
+  void onLoginSuccess(){
+    sl<SharedPreferencesWrapper>().setString(SharedPrefsKey.firstTimer,
+        'first_timer');
+
+    sl<NavigationService>().removeAllAndNavigateTo(Routes.appBottomNav);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginCubit, LoginState>(
@@ -78,7 +83,7 @@ class _LoginViewState extends State<_LoginView> {
             context,
             message: state.message ?? 'Welcome back!',
           );
-          navigationService.removeAllAndNavigateTo(Routes.appBottomNav);
+         onLoginSuccess();
         }
       },
       builder: (context, state) {

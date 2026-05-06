@@ -73,7 +73,7 @@ class TupayTheme {
       bottomSheetTheme: theme.bottomSheetTheme.copyWith(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(40),
+            top: Radius.circular(16),
           ),
         ),
         backgroundColor: AppColors.primaryColor.withValues(alpha: 0.4),
@@ -135,18 +135,22 @@ class TupayTheme {
         ),
       ),
       colorScheme: theme.colorScheme.copyWith(
-        primary: AppColors.primaryColor,
+        primary: AppColors.secondaryColor,
         surface: AppColors.backgroundColor,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.secondaryColor,
+        selectionColor: AppColors.secondaryColor.withValues(alpha: 0.25),
+        selectionHandleColor: AppColors.secondaryColor,
       ),
     );
   }
 
   static OutlineInputBorder outlineInputBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(8),
       borderSide: const BorderSide(
-        color: Color(0xffC8D4EA),
-        width: 0.5,
+        color: AppColors.inputBorder,
       ),
     );
   }

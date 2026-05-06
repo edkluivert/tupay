@@ -30,43 +30,40 @@ class AmountView extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 390),
-          child: Column(
-            children: [
-              _AmountCard(
-                state: state,
-                amountController: amountController,
-                onAmountChanged: onAmountChanged,
-                amountValidator: amountValidator,
-              )
-                  .animate()
-                  .fadeIn(delay: 80.ms, duration: 350.ms)
-                  .slideY(begin: 0.12, end: 0, delay: 80.ms, duration: 400.ms, curve: Curves.easeOutCubic),
+        child: Column(
+          children: [
+            _AmountCard(
+              state: state,
+              amountController: amountController,
+              onAmountChanged: onAmountChanged,
+              amountValidator: amountValidator,
+            )
+                .animate()
+                .fadeIn(delay: 80.ms, duration: 350.ms)
+                .slideY(begin: 0.12, end: 0, delay: 80.ms, duration: 400.ms, curve: Curves.easeOutCubic),
 
-              context.uiHelper.verticalSpace(24),
+            context.uiHelper.verticalSpace(24),
 
-              PaymentMethodCard(
-                state: state,
-                onPaymentMethodTap: onPaymentMethodTap,
-              )
-                  .animate()
-                  .fadeIn(delay: 140.ms, duration: 350.ms)
-                  .slideY(begin: 0.12, end: 0, delay: 140.ms, duration: 400.ms, curve: Curves.easeOutCubic),
+            PaymentMethodCard(
+              state: state,
+              onPaymentMethodTap: onPaymentMethodTap,
+            )
+                .animate()
+                .fadeIn(delay: 140.ms, duration: 350.ms)
+                .slideY(begin: 0.12, end: 0, delay: 140.ms, duration: 400.ms, curve: Curves.easeOutCubic),
 
-              context.uiHelper.verticalSpace(32),
+            context.uiHelper.verticalSpace(32),
 
-              StepNextButton(
-                label: 'Continue to Recipient',
-                onTap: onNext,
-              )
-                  .animate()
-                  .fadeIn(delay: 200.ms, duration: 350.ms)
-                  .slideY(begin: 0.12, end: 0, delay: 200.ms, duration: 400.ms, curve: Curves.easeOutCubic),
+            StepNextButton(
+              label: 'Continue to Recipient',
+              onTap: onNext,
+            )
+                .animate()
+                .fadeIn(delay: 200.ms, duration: 350.ms)
+                .slideY(begin: 0.12, end: 0, delay: 200.ms, duration: 400.ms, curve: Curves.easeOutCubic),
 
-              context.uiHelper.verticalSpace(40),
-            ],
-          ),
+            context.uiHelper.verticalSpace(40),
+          ],
         ),
       ),
     );

@@ -167,7 +167,7 @@ class _SignupViewState extends State<_SignupView> {
                             spacing: 12,
                             children: [
                               Expanded(
-                                flex: 2,
+                                flex: 3,
                                 child: CustomDropdown<SignupCountry>(
                                   value: state.selectedCountry,
                                   fillColor: AppColors.lightGrey,

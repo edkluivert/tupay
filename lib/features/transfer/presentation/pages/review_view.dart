@@ -24,138 +24,135 @@ class ReviewView extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 390),
-          child: Column(
-            children: [
+        child: Column(
+          children: [
 
-              WhiteCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Review your transfer',
-                      style: context.appTextTheme.bodyNormal16Regular?.copyWith(
-                        color: AppColors.textColor,
+            WhiteCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Review your transfer',
+                    style: context.appTextTheme.bodyNormal16Regular?.copyWith(
+                      color: AppColors.textColor,
+                    ),
+                  ),
+                  context.uiHelper.verticalSpace(8),
+                  Text(
+                    'Please confirm all details before sending.',
+                    style: context.appTextTheme.bodySmall14Regular?.copyWith(
+                      color: AppColors.textColor2,
+                    ),
+                  ),
+                  context.uiHelper.verticalSpace(24),
+
+
+                  _ReviewSection(
+                    title: 'TRANSFER DETAILS',
+                    rows: [
+                      _ReviewRow(
+                        label: 'You Send',
+                        value: state.formattedSending,
+                        valueColor: AppColors.textColor,
                       ),
-                    ),
-                    context.uiHelper.verticalSpace(8),
-                    Text(
-                      'Please confirm all details before sending.',
-                      style: context.appTextTheme.bodySmall14Regular?.copyWith(
-                        color: AppColors.textColor2,
+                      _ReviewRow(
+                        label: 'Recipient Gets',
+                        value: state.formattedRecipientGetsWithCurrency,
+                        valueColor: AppColors.secondaryColor,
                       ),
-                    ),
-                    context.uiHelper.verticalSpace(24),
+                      _ReviewRow(
+                        label: 'Exchange Rate',
+                        value: state.exchangeRateText.replaceFirst('Rate: ', ''),
+                      ),
+                      _ReviewRow(
+                        label: 'Fee',
+                        value: state.formattedFee,
+                        valueColor: state.formattedFee.contains('Promo')
+                            ? AppColors.secondaryColor
+                            : AppColors.textColor,
+                      ),
+                      _ReviewRow(
+                        label: 'Estimated Arrival',
+                        value: 'Today, ~15 mins',
+                      ),
+                    ],
+                  ),
+
+                  context.uiHelper.verticalSpace(20),
 
 
-                    _ReviewSection(
-                      title: 'TRANSFER DETAILS',
-                      rows: [
-                        _ReviewRow(
-                          label: 'You Send',
-                          value: state.formattedSending,
-                          valueColor: AppColors.textColor,
-                        ),
-                        _ReviewRow(
-                          label: 'Recipient Gets',
-                          value: state.formattedRecipientGetsWithCurrency,
-                          valueColor: AppColors.secondaryColor,
-                        ),
-                        _ReviewRow(
-                          label: 'Exchange Rate',
-                          value: state.exchangeRateText.replaceFirst('Rate: ', ''),
-                        ),
-                        _ReviewRow(
-                          label: 'Fee',
-                          value: state.formattedFee,
-                          valueColor: state.formattedFee.contains('Promo')
-                              ? AppColors.secondaryColor
-                              : AppColors.textColor,
-                        ),
-                        _ReviewRow(
-                          label: 'Estimated Arrival',
-                          value: 'Today, ~15 mins',
-                        ),
-                      ],
-                    ),
+                  _ReviewSection(
+                    title: 'RECIPIENT',
+                    rows: [
+                      _ReviewRow(
+                        label: 'Name',
+                        value: state.recipientName.isEmpty
+                            ? '—'
+                            : state.recipientName,
+                      ),
+                      _ReviewRow(
+                        label: 'Account',
+                        value: state.recipientAccount.isEmpty
+                            ? '—'
+                            : state.recipientAccount,
+                        isMonospace: true,
+                      ),
+                    ],
+                  ),
 
-                    context.uiHelper.verticalSpace(20),
+                  context.uiHelper.verticalSpace(20),
 
 
-                    _ReviewSection(
-                      title: 'RECIPIENT',
-                      rows: [
-                        _ReviewRow(
-                          label: 'Name',
-                          value: state.recipientName.isEmpty
-                              ? '—'
-                              : state.recipientName,
-                        ),
-                        _ReviewRow(
-                          label: 'Account',
-                          value: state.recipientAccount.isEmpty
-                              ? '—'
-                              : state.recipientAccount,
-                          isMonospace: true,
-                        ),
-                      ],
-                    ),
+                  _ReviewSection(
+                    title: 'PAYMENT METHOD',
+                    rows: [
+                      _ReviewRow(
+                        label: 'Method',
+                        value: TransferFlowState.paymentMethods
+                            .firstWhere(
+                              (m) => m.type == state.selectedPaymentMethod,
+                        )
+                            .title,
+                      ),
+                    ],
+                  ),
 
-                    context.uiHelper.verticalSpace(20),
-
-
-                    _ReviewSection(
-                      title: 'PAYMENT METHOD',
-                      rows: [
-                        _ReviewRow(
-                          label: 'Method',
-                          value: TransferFlowState.paymentMethods
-                              .firstWhere(
-                                (m) => m.type == state.selectedPaymentMethod,
-                          )
-                              .title,
-                        ),
-                      ],
-                    ),
-
-                    // Edit link
-                    context.uiHelper.verticalSpace(16),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: BouncyClickableWidget(
-                        onTap: onBack,
-                        child: Text(
-                          '← Edit details',
-                          style: context.appTextTheme.bodySmall14Regular?.copyWith(
-                            color: AppColors.secondaryColor,
-                            fontSize: 13,
-                          ),
+                  // Edit link
+                  context.uiHelper.verticalSpace(16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: BouncyClickableWidget(
+                      onTap: onBack,
+                      child: Text(
+                        '← Edit details',
+                        style: context.appTextTheme.bodySmall14Regular?.copyWith(
+                          color: AppColors.secondaryColor,
+                          fontSize: 13,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              )
-                  .animate()
-                  .fadeIn(delay: 60.ms, duration: 350.ms)
-                  .slideY(begin: 0.10, end: 0, delay: 60.ms, duration: 380.ms, curve: Curves.easeOutCubic),
-
-              context.uiHelper.verticalSpace(24),
-
-
-              TransferSummaryCard(
-                state: state,
-                onReviewAndSend: onReviewAndSend,
+                  ),
+                ],
               ),
+            )
+                .animate()
+                .fadeIn(delay: 60.ms, duration: 350.ms)
+                .slideY(begin: 0.10, end: 0, delay: 60.ms, duration: 380.ms, curve: Curves.easeOutCubic),
 
-              context.uiHelper.verticalSpace(24),
+            context.uiHelper.verticalSpace(24),
 
-              const SecurityNotice(),
 
-              context.uiHelper.verticalSpace(120),
-            ],
-          ),
+            TransferSummaryCard(
+              state: state,
+              onReviewAndSend: onReviewAndSend,
+            ),
+
+            context.uiHelper.verticalSpace(24),
+
+            const SecurityNotice(),
+
+            context.uiHelper.verticalSpace(120),
+          ],
         ),
       ),
     );

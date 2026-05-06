@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tupay/app/view/app.dart';
@@ -8,13 +9,14 @@ void main() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,);
   await configureDependencies();
   runApp(const App());
-  // await bootstrap(
-  //   () => DevicePreview(
+  // runApp(
+  //   DevicePreview(
   //     builder: (context) {
   //       return const App();
   //     },
   //   ),
   // );
+
 }
 
 

@@ -75,7 +75,7 @@ class ExpandedCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            context.uiHelper.horizontalSpace(8),
             Text(
               'vs last month',
               style: context.appTextTheme.bodySmall14Regular?.copyWith(

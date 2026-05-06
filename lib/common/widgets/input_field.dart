@@ -111,7 +111,7 @@ class _InputFieldState extends State<InputField> {
             color: AppColors.textColor,
           ),
           readOnly: widget.readOnly,
-          cursorColor: AppColors.primaryColor,
+          cursorColor: AppColors.secondaryColor,
           inputFormatters: widget.inputFormatters ?? [],
           onEditingComplete: () {
             if (widget.enterPressed != null) {
