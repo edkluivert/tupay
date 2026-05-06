@@ -1,6 +1,6 @@
 // Golden tests for the main Dashboard.
 
-//  Regenerate baselines
+
 // flutter test --update-goldens test/dashboard_golden_test.dart
 
 
