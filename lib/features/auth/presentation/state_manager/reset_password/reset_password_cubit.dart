@@ -59,8 +59,8 @@ class ResetPasswordCubit extends Cubit<ResetPasswordState> {
     }
 
     final hasMinLength = password.length >= 8;
-    final hasUppercase = RegExp(r'[A-Z]').hasMatch(password);
-    final hasNumber = RegExp(r'[0-9]').hasMatch(password);
+    final hasUppercase = RegExp('[A-Z]').hasMatch(password);
+    final hasNumber = RegExp('[0-9]').hasMatch(password);
     final hasSpecial = RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=]').hasMatch(password);
 
     if (!hasMinLength || !hasUppercase || !hasNumber || !hasSpecial) {

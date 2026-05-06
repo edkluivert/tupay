@@ -9,9 +9,9 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
 
   /// Mock registered emails.
   static const List<String> _registeredEmails = [
-    'john@tupay.test',
-    'demo@tupay.test',
-    'mary@tupay.test',
+    'tola@tupay.demo',
+    'ada@tupay.demo',
+    'seyi@tupay.demo',
   ];
 
   Future<void> sendResetLink({
