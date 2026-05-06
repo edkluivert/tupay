@@ -71,7 +71,7 @@ class ReviewView extends StatelessWidget {
                             ? AppColors.secondaryColor
                             : AppColors.textColor,
                       ),
-                      _ReviewRow(
+                      const _ReviewRow(
                         label: 'Estimated Arrival',
                         value: 'Today, ~15 mins',
                       ),

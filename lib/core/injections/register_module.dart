@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tupay/core/handlers/shared_preferences_wrapper.dart';
 import 'package:tupay/core/services/current_user_service.dart';
+import 'package:tupay/features/transfer/data/local/transfer_draft_storage.dart';
 
 @module
 abstract class RegisterModule {
@@ -25,4 +26,12 @@ abstract class RegisterModule {
 
   @lazySingleton
   CurrentUserService get currentUserService => CurrentUserService();
+
+  @lazySingleton
+  TransferDraftStorage  transferDraftStorage (
+     FlutterSecureStorage secureStorage
+  ){
+    return TransferDraftStorage(secureStorage);
+  }
+
 }

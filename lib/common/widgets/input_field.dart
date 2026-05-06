@@ -35,6 +35,7 @@ class InputField extends StatefulWidget {
     this.initialValue,
     this.fillColor = Colors.transparent,
     this.additionalNoteTextColor,
+    this.borderColor,
   });
 
   final TextEditingController? controller;
@@ -65,6 +66,7 @@ class InputField extends StatefulWidget {
   final String? label;
   final TextStyle? labelStyle;
   final Color? additionalNoteTextColor;
+  final Color? borderColor;
 
   @override
   // ignore: library_private_types_in_public_api
@@ -172,7 +174,7 @@ class _InputFieldState extends State<InputField> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.radius!),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
+              borderSide:  BorderSide(color: widget.borderColor??AppColors.inputBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.radius!),

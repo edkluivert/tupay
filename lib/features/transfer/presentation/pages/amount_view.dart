@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:tupay/common/widgets/custom_dropdown.dart';
 import 'package:tupay/features/features.dart';
+import 'package:tupay/features/transfer/data/models/transfer_currency.dart';
 import 'package:tupay/features/transfer/presentation/state_manager/transfer_flow_cubit.dart';
 import 'package:tupay/features/transfer/presentation/state_manager/transfer_flow_state.dart';
 import 'package:tupay/features/transfer/presentation/widgets/payment_method_card.dart';
@@ -111,22 +113,30 @@ class _AmountCard extends StatelessWidget {
             onChanged: onAmountChanged,
             currency: TransferFlowState.sendCurrency,
             flag: '🇺🇸',
-            readOnly: false,
+            value: '',
           ),
 
           context.uiHelper.verticalSpace(24),
 
           BlocBuilder<TransferFlowCubit, TransferFlowState>(
-  builder: (context, tState) {
-    return _CurrencyAmountField(
-            label: 'Recipient Gets',
-            value: tState.formattedRecipientGets,
-            currency: TransferFlowState.recipientCurrency,
-            flag: '🇪🇺',
-            readOnly: true,
-          );
-  },
-),
+            builder: (context, tState) {
+              return _CurrencyAmountField(
+                label: 'Recipient Gets',
+                value: tState.formattedRecipientGets,
+                currency: tState.recipientCurrency.code,
+                flag: tState.recipientCurrency.flag,
+                readOnly: true,
+                selectedCurrency: tState.recipientCurrency,
+                currencies: const [
+                  TransferCurrency.rmb,
+                  TransferCurrency.eur,
+                  TransferCurrency.usd,
+                ],
+                onCurrencyChanged:
+                context.read<TransferFlowCubit>().recipientCurrencyChanged,
+              );
+            },
+          ),
 
           context.uiHelper.verticalSpace(24),
           _RateBreakdown(state: state),
@@ -139,52 +149,147 @@ class _AmountCard extends StatelessWidget {
 class _CurrencyAmountField extends StatelessWidget {
   const _CurrencyAmountField({
     required this.label,
+    required this.value,
     required this.currency,
     required this.flag,
-    required this.readOnly,
+    this.readOnly = false,
     this.controller,
-    this.value,
-    this.validator,
     this.onChanged,
+    this.validator,
+    this.selectedCurrency,
+    this.currencies = const [],
+    this.onCurrencyChanged,
   });
 
   final String label;
+  final String value;
   final String currency;
   final String flag;
   final bool readOnly;
+
   final TextEditingController? controller;
-  final String? value;
-  final FormFieldValidator<String?>? validator;
   final ValueChanged<String>? onChanged;
+  final FormFieldValidator<String>? validator;
+
+  final TransferCurrency? selectedCurrency;
+  final List<TransferCurrency> currencies;
+  final ValueChanged<TransferCurrency>? onCurrencyChanged;
 
   @override
   Widget build(BuildContext context) {
+    final hasCurrencyDropdown =
+        selectedCurrency != null && currencies.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: context.appTextTheme.bodyNormal16Regular?.copyWith(
+          style: context.appTextTheme.bodySmall14Regular?.copyWith(
             color: AppColors.textColor2,
           ),
         ),
+
         context.uiHelper.verticalSpace(8),
-        InputField(
-          inputKey: readOnly ? ValueKey(value) : null,
-          controller: controller,
-          initialValue: controller == null ? value : null,
-          readOnly: readOnly,
-          validator: validator,
-          onChanged: onChanged,
-          textInputType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: readOnly
-              ? null
-              : [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
-          suffix: Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: _CurrencyPill(flag: flag, currency: currency),
+
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 4,
           ),
-          hint: '',
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.inputBorder.withAlpha(80),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: readOnly
+                    ? Text(
+                  value.isEmpty ? '0.00' : value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.appTextTheme.bodyNormal16Regular
+                      ?.copyWith(
+                    color: value.isEmpty ? AppColors.grey200 : AppColors.textColor,
+                  ),
+                )
+                    : TextFormField(
+                  controller: controller,
+                  onChanged: onChanged,
+                  validator: validator,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  style: context.appTextTheme.bodyNormal16Regular
+                      ?.copyWith(
+                    color: AppColors.textColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  decoration:  InputDecoration(
+                    hint: Text('0.00',
+                      style: context.appTextTheme.bodyNormal16Regular?.copyWith(
+                        color: AppColors.grey200,
+                      ),
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+
+              context.uiHelper.horizontalSpace(12),
+
+              SizedBox(
+                width: 110,
+                child: !hasCurrencyDropdown
+                    ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    Text(flag,),
+
+                    Text(
+                      currency,
+                      style: context.appTextTheme.bodySmall14Regular
+                          ?.copyWith(
+                        color: AppColors.textColor,
+                      ),
+                    ),
+                  ],
+                )
+                    : CustomDropdown<TransferCurrency>(
+                  value: selectedCurrency,
+                  fillColor: AppColors.lightGrey,
+                  selectedTextBuilder: (currency) {
+                    return '${currency.flag} ${currency.code}';
+                  },
+                  menuItems: currencies.map((currency) {
+                    return DropdownMenuItem<TransferCurrency>(
+                      value: currency,
+                      child: Text(
+                        '${currency.flag} ${currency.code}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (currency) {
+                    if (currency == null) return;
+                    onCurrencyChanged?.call(currency);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

@@ -21,6 +21,8 @@ import 'package:tupay/features/app_bottom_nav/presentation/state_manager/app_bot
     as _i643;
 import 'package:tupay/features/auth/presentation/state_manager/auth/auth_bloc.dart'
     as _i1035;
+import 'package:tupay/features/transfer/data/local/transfer_draft_storage.dart'
+    as _i531;
 
 // initializes the registration of main-scope dependencies inside of GetIt
 Future<_i174.GetIt> init(
@@ -50,6 +52,9 @@ Future<_i174.GetIt> init(
     () => _i1035.AuthBloc(
       sharedPreferencesWrapper: gh<_i761.SharedPreferencesWrapper>(),
     ),
+  );
+  gh.lazySingleton<_i531.TransferDraftStorage>(
+    () => registerModule.transferDraftStorage(gh<_i558.FlutterSecureStorage>()),
   );
   return getIt;
 }

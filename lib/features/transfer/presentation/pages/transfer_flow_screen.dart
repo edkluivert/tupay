@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tupay/common/widgets/bouncing_clickable.dart';
 import 'package:tupay/features/features.dart';
+import 'package:tupay/features/transfer/data/models/transfer_currency.dart';
 import 'package:tupay/features/transfer/presentation/pages/amount_view.dart';
 import 'package:tupay/features/transfer/presentation/pages/reciepients_view.dart';
 import 'package:tupay/features/transfer/presentation/pages/review_view.dart';
@@ -13,20 +10,17 @@ import 'package:tupay/features/transfer/presentation/widgets/contacts_sheet.dart
 import 'package:tupay/features/transfer/presentation/widgets/transfer_app_bar.dart';
 import 'package:tupay/features/transfer/presentation/widgets/transfer_stepper.dart';
 
-
-
 class TransferFlowScreen extends StatelessWidget {
   const TransferFlowScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TransferFlowCubit(),
+      create: (_) => TransferFlowCubit()..loadSavedDraft(),
       child: const _TransferFlowView(),
     );
   }
 }
-
 
 class _TransferFlowView extends StatefulWidget {
   const _TransferFlowView();
@@ -35,25 +29,17 @@ class _TransferFlowView extends StatefulWidget {
   State<_TransferFlowView> createState() => _TransferFlowViewState();
 }
 
-/// State Restoration:
-/// We mix in [RestorationMixin] so Flutter's RestorationManager can
-/// serialize and restore these properties when the OS kills the app
-/// in the background while the user is mid-payment.
-
-/// Each [RestorableString] / [RestorableInt] is registered with a unique
-/// restoration ID so the engine can persist them automatically —
-/// no shared_preferences or manual writes needed.
-
 class _TransferFlowViewState extends State<_TransferFlowView>
     with RestorationMixin {
   final _formKey = GlobalKey<FormState>();
+
   late final PageController _pageController;
 
   final _stepIndex = RestorableInt(0);
-  final _sendAmount = RestorableString('1000');
+  final _sendAmount = RestorableString('');
   final _recipientName = RestorableString('');
   final _recipientAccount = RestorableString('');
-
+  final _recipientCurrency = RestorableString(TransferCurrency.rmb.name);
 
   late final TextEditingController _amountController;
   late final TextEditingController _recipientNameController;
@@ -62,16 +48,13 @@ class _TransferFlowViewState extends State<_TransferFlowView>
   @override
   String get restorationId => 'transfer_flow_view';
 
-
   @override
   void initState() {
     super.initState();
 
-    // Do NOT read _stepIndex.value or _sendAmount.value here.
-    // Restorable values are not registered yet in initState.
     _pageController = PageController(initialPage: 0);
 
-    _amountController = TextEditingController(text: '1000');
+    _amountController = TextEditingController();
     _recipientNameController = TextEditingController();
     _recipientAccountController = TextEditingController();
   }
@@ -82,13 +65,21 @@ class _TransferFlowViewState extends State<_TransferFlowView>
     registerForRestoration(_sendAmount, 'send_amount');
     registerForRestoration(_recipientName, 'recipient_name');
     registerForRestoration(_recipientAccount, 'recipient_account');
+    registerForRestoration(_recipientCurrency, 'recipient_currency');
 
-    final safeStepIndex = _stepIndex.value.clamp(
+    final safeStepIndex = _stepIndex.value
+        .clamp(
       0,
       TransferStep.values.length - 1,
-    );
+    )
+        ;
 
     final restoredStep = TransferStep.values[safeStepIndex];
+
+    final restoredCurrency = TransferCurrency.values.firstWhere(
+          (currency) => currency.name == _recipientCurrency.value,
+      orElse: () => TransferCurrency.rmb,
+    );
 
     _amountController.text = _sendAmount.value;
     _recipientNameController.text = _recipientName.value;
@@ -104,6 +95,7 @@ class _TransferFlowViewState extends State<_TransferFlowView>
         sendAmount: _sendAmount.value,
         recipientName: _recipientName.value,
         recipientAccount: _recipientAccount.value,
+        recipientCurrency: restoredCurrency,
       );
 
       if (_pageController.hasClients) {
@@ -118,10 +110,14 @@ class _TransferFlowViewState extends State<_TransferFlowView>
     _sendAmount.dispose();
     _recipientName.dispose();
     _recipientAccount.dispose();
+    _recipientCurrency.dispose();
+
     _pageController.dispose();
+
     _amountController.dispose();
     _recipientNameController.dispose();
     _recipientAccountController.dispose();
+
     super.dispose();
   }
 
@@ -135,8 +131,10 @@ class _TransferFlowViewState extends State<_TransferFlowView>
 
   void _handleNext(BuildContext context) {
     FocusManager.instance.primaryFocus?.unfocus();
+
     final cubit = context.read<TransferFlowCubit>();
     final advanced = cubit.nextStep();
+
     if (advanced) {
       _animateToStep(cubit.state.step);
     }
@@ -144,18 +142,23 @@ class _TransferFlowViewState extends State<_TransferFlowView>
 
   void _handleBack(BuildContext context) {
     FocusManager.instance.primaryFocus?.unfocus();
+
     final cubit = context.read<TransferFlowCubit>();
+
     if (cubit.state.isFirstStep) {
       Navigator.of(context).maybePop();
       return;
     }
+
     cubit.previousStep();
     _animateToStep(cubit.state.step);
   }
 
   void _handleReviewAndSend(BuildContext context) {
     FocusManager.instance.primaryFocus?.unfocus();
+
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
     context.read<TransferFlowCubit>().reviewAndSend();
   }
 
@@ -167,23 +170,46 @@ class _TransferFlowViewState extends State<_TransferFlowView>
       builder: (_) => ContactsSheet(
         onSelected: (contact) {
           context.read<TransferFlowCubit>().selectContact(contact);
+
           _recipientNameController.text = contact.name;
           _recipientAccountController.text = contact.account;
+
           Navigator.pop(context);
         },
       ),
     );
   }
 
+  void _syncControllersFromState(TransferFlowState state) {
+    if (_amountController.text != state.sendAmount) {
+      _amountController.text = state.sendAmount;
+    }
+
+    if (_recipientNameController.text != state.recipientName) {
+      _recipientNameController.text = state.recipientName;
+    }
+
+    if (_recipientAccountController.text != state.recipientAccount) {
+      _recipientAccountController.text = state.recipientAccount;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TransferFlowCubit, TransferFlowState>(
       listener: (context, state) {
-
         _stepIndex.value = state.step.index;
         _sendAmount.value = state.sendAmount;
         _recipientName.value = state.recipientName;
         _recipientAccount.value = state.recipientAccount;
+        _recipientCurrency.value = state.recipientCurrency.name;
+
+        _syncControllersFromState(state);
+
+        if (_pageController.hasClients &&
+            _pageController.page?.round() != state.step.index) {
+          _pageController.jumpToPage(state.step.index);
+        }
 
         if (state.isFailure) {
           AppSnackBar.showFailure(
@@ -191,11 +217,26 @@ class _TransferFlowViewState extends State<_TransferFlowView>
             message: state.message ?? 'Unable to continue.',
           );
         }
+
         if (state.isSuccess) {
           AppSnackBar.showSuccess(
             context,
             message: state.message ?? 'Transfer submitted.',
           );
+
+          _amountController.text = state.sendAmount;
+          _recipientNameController.clear();
+          _recipientAccountController.clear();
+
+          _stepIndex.value = TransferStep.amount.index;
+          _sendAmount.value = state.sendAmount;
+          _recipientName.value = '';
+          _recipientAccount.value = '';
+          _recipientCurrency.value = TransferCurrency.rmb.name;
+
+          if (_pageController.hasClients) {
+            _pageController.jumpToPage(TransferStep.amount.index);
+          }
         }
       },
       builder: (context, state) {
@@ -222,18 +263,21 @@ class _TransferFlowViewState extends State<_TransferFlowView>
                     ),
                     child: TransferStepper(
                       currentStep: state.step,
-                      onStepTap: (s) {
-                        cubit.stepChanged(s);
+                      onStepTap: (step) {
+                        cubit.stepChanged(step);
                         _animateToStep(cubit.state.step);
                       },
                     )
                         .animate()
                         .fadeIn(duration: 300.ms)
-                        .slideY(begin: 0.18, end: 0, duration: 360.ms, curve: Curves.easeOutCubic),
+                        .slideY(
+                      begin: 0.18,
+                      end: 0,
+                      duration: 360.ms,
+                      curve: Curves.easeOutCubic,
+                    ),
                   ),
-
                   context.uiHelper.verticalSpace(20),
-
                   Expanded(
                     child: Form(
                       key: _formKey,
@@ -250,7 +294,6 @@ class _TransferFlowViewState extends State<_TransferFlowView>
                             onPaymentMethodTap: cubit.paymentMethodChanged,
                             onNext: () => _handleNext(context),
                           ),
-
                           RecipientView(
                             state: state,
                             nameController: _recipientNameController,
@@ -263,7 +306,6 @@ class _TransferFlowViewState extends State<_TransferFlowView>
                             onNext: () => _handleNext(context),
                             onBack: () => _handleBack(context),
                           ),
-
                           ReviewView(
                             state: state,
                             onReviewAndSend: () => _handleReviewAndSend(context),
