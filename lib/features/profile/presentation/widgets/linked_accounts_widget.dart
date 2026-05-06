@@ -1,6 +1,7 @@
 import 'package:tupay/common/widgets/bouncing_clickable.dart';
 import 'package:tupay/features/features.dart';
 import 'package:tupay/features/profile/presentation/state_manager/profile_state.dart';
+import 'package:tupay/features/auth/domain/models/user_model.dart';
 
 class LinkedMethodsCard extends StatelessWidget {
   const LinkedMethodsCard({
@@ -64,6 +65,10 @@ class _LinkedMethodRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final initials = method.initials.length > 4
+        ? method.initials.substring(0, 4)
+        : method.initials;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Container(
@@ -75,7 +80,6 @@ class _LinkedMethodRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-
             Container(
               width: 40,
               height: 40,
@@ -85,9 +89,9 @@ class _LinkedMethodRow extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: Text(
-                method.initials.length > 2
-                    ? method.initials.substring(0, 5)
-                    : method.initials,
+                initials,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: context.appTextTheme.heading?.copyWith(
                   color: AppColors.white,
                   fontSize: 8,
@@ -101,12 +105,16 @@ class _LinkedMethodRow extends StatelessWidget {
                 children: [
                   Text(
                     method.bankName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: context.appTextTheme.bodyNormal16Regular?.copyWith(
                       color: AppColors.textColor,
                     ),
                   ),
                   Text(
                     '${method.type} •••• ${method.maskedNumber}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: context.appTextTheme.bodyNormal16Regular?.copyWith(
                       fontSize: 12,
                       color: AppColors.textColor1,

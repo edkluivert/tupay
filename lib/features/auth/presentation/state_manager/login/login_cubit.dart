@@ -2,21 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:tupay/core/constants/mock_data.dart';
+import 'package:tupay/core/injections/injection.dart';
+import 'package:tupay/core/services/current_user_service.dart';
 import 'package:tupay/features/auth/presentation/state_manager/login/login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
   LoginCubit() : super(const LoginInitial());
-
-  /// Mock login credentials.
-  /// User can login using either email or username.
-  static const Map<String, String> _allowedCredentials = {
-    'john@tupay.test': 'Password123!',
-    'john': 'Password123!',
-    'demo@tupay.test': 'Demo123!',
-    'demo': 'Demo123!',
-    'mary@tupay.test': 'Tupay123!',
-    'mary': 'Tupay123!',
-  };
 
   Future<void> login({
     required String emailOrUsername,
@@ -37,22 +29,28 @@ class LoginCubit extends Cubit<LoginState> {
 
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
-    final expectedPassword = _allowedCredentials[normalizedIdentifier];
+    try {
+      final user = MockData.users.values.firstWhere(
+        (u) =>
+            (u.email.toLowerCase() == normalizedIdentifier ||
+                u.username.toLowerCase() == normalizedIdentifier) &&
+            u.password == normalizedPassword,
+      );
 
-    if (expectedPassword == null || expectedPassword != normalizedPassword) {
+      sl<CurrentUserService>().currentUser = user;
+
+      emit(
+        const LoginSuccess(
+          message: 'Welcome back!',
+        ),
+      );
+    } catch (_) {
       emit(
         const LoginFailure(
           message: 'Invalid login details. Try demo@tupay.test / Demo123!',
         ),
       );
-      return;
     }
-
-    emit(
-      const LoginSuccess(
-        message: 'Welcome back!',
-      ),
-    );
   }
 
   Future<void> loginWithBiometric() async {

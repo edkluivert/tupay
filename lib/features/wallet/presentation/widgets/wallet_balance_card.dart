@@ -175,28 +175,35 @@ class _AnimatedCashBalance extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = '$currencySymbol$balance';
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(text.length, (index) {
-        final character = text[index];
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(text.length, (index) {
+            final character = text[index];
 
-        return _CashCharacter(
-          key: ValueKey('$index-$character'),
-          character: character,
-          delay: Duration(milliseconds: index * 35),
-        );
-      }),
-    )
-        .animate()
-        .fadeIn(
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOut,
-    )
-        .slideY(
-      begin: 0.12,
-      end: 0,
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
+            return _CashCharacter(
+              key: ValueKey('$index-$character'),
+              character: character,
+              delay: Duration(milliseconds: index * 35),
+            );
+          }),
+        )
+            .animate()
+            .fadeIn(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOut,
+        )
+            .slideY(
+          begin: 0.12,
+          end: 0,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+        ),
+      ),
     );
   }
 }
@@ -239,7 +246,7 @@ class _CashCharacter extends StatelessWidget {
         character,
         key: ValueKey(character),
         style: context.appTextTheme.bodySmall14Regular?.copyWith(
-          fontSize: 48,
+          fontSize: 38,
           color: AppColors.white,
           fontWeight: FontWeight.w500,
           height: 1,

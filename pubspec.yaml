@@ -49,6 +49,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   get_it: ^8.0.3
   injectable: ^2.5.0
+  secure_application: ^4.1.0
 
 
 dev_dependencies:
@@ -58,6 +59,7 @@ dev_dependencies:
   very_good_analysis: ^6.0.0
   injectable_generator: ^2.7.0
   build_runner: ^2.4.15
+  bloc_test: ^9.1.7
 
 
 flutter:

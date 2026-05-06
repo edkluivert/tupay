@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:secure_application/secure_application.dart';
 import 'package:tupay/core/constants/app_colors.dart';
 import 'package:tupay/core/injections/injection.dart';
-import 'package:tupay/core/logger/app_logger.dart';
 import 'package:tupay/core/navigation/navigation_service.dart';
 import 'package:tupay/core/navigation/route_generator.dart';
 import 'package:tupay/core/navigation/route_paths.dart';
@@ -22,10 +24,14 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-
   late final AuthBloc _authBloc;
 
   final navigatorService = sl<NavigationService>();
+
+  Timer? _navigationTimer;
+  bool _hasNavigated = false;
+
+  static const _splashDelay = Duration(seconds: 4);
 
   @override
   void initState() {
@@ -34,6 +40,38 @@ class _AppState extends State<App> {
     _authBloc.add(AppStarted());
   }
 
+  @override
+  void dispose() {
+    _navigationTimer?.cancel();
+    _authBloc.close();
+    super.dispose();
+  }
+
+  void _scheduleInitialNavigation(String route) {
+    if (_hasNavigated) return;
+
+    _navigationTimer?.cancel();
+
+    _navigationTimer = Timer(_splashDelay, () {
+      if (!mounted || _hasNavigated) return;
+
+      final navigatorState = navigatorService.navigationKey.currentState;
+      if (navigatorState == null) return;
+
+      _hasNavigated = true;
+      navigatorService.removeAllAndNavigateTo(route);
+    });
+  }
+
+  void _navigateImmediately(String route) {
+    _navigationTimer?.cancel();
+
+    final navigatorState = navigatorService.navigationKey.currentState;
+    if (navigatorState == null) return;
+
+    _hasNavigated = true;
+    navigatorService.removeAllAndNavigateTo(route);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,31 +80,54 @@ class _AppState extends State<App> {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is FirstTimer) {
-            AppLogger.w('Sending to app sign up');
-            navigatorService.removeAllAndNavigateTo(Routes.appBottomNav);
-          } else if (state is Unauthenticated) {
-            AppLogger.d('Help me, Help me, Dem dey carry me go where i nor know');
-            navigatorService.removeAllAndNavigateTo(Routes.login);
-          } else {
-            AppLogger.d('Developers are not aware of this problem');
-            navigatorService.removeAllAndNavigateTo(Routes.login);
+            _scheduleInitialNavigation(Routes.signup);
+            return;
+          }
+
+          if (state is Unauthenticated) {
+            if (_hasNavigated) {
+              _navigateImmediately(Routes.login);
+            } else {
+              _scheduleInitialNavigation(Routes.login);
+            }
           }
         },
-        child: AnnotatedRegion(
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
           value: const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: Brightness.dark,
             systemNavigationBarColor: AppColors.secondaryColor,
             systemNavigationBarIconBrightness: Brightness.light,
           ),
-          child: MaterialApp(
-            title: 'TuPay',
-            theme: TupayTheme.createLightThemeData(),
-            onGenerateRoute: generateRoute,
-            onUnknownRoute: generateRoute,
-            navigatorKey: navigatorService.navigationKey,
-            debugShowCheckedModeBanner: false,
-            home: const SplashScreen(),
+          child: SecureApplication(
+            child: MaterialApp(
+              title: 'TuPay',
+              theme: TupayTheme.createLightThemeData(),
+              onGenerateRoute: generateRoute,
+              onUnknownRoute: generateRoute,
+              navigatorKey: navigatorService.navigationKey,
+              debugShowCheckedModeBanner: false,
+              restorationScopeId: 'tupay_app',
+              home: const SplashScreen(),
+
+              builder: (context, child) {
+                return SecureGate(
+                  blurr: 10,
+                  opacity: 0.5,
+                  lockedBuilder: (context, secureNotifier) => Container(
+                    color: AppColors.primaryColor,
+                    child: const Center(
+                      child: Icon(
+                        Icons.lock_outline,
+                        size: 48,
+                        color: AppColors.secondaryColor,
+                      ),
+                    ),
+                  ),
+                  child: child ?? const SizedBox.shrink(),
+                );
+              },
+            ),
           ),
         ),
       ),

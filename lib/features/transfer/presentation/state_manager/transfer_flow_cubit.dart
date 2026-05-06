@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:tupay/core/injections/injection.dart';
 import 'package:tupay/features/transfer/presentation/state_manager/transfer_flow_state.dart';
 
 class TransferFlowCubit extends Cubit<TransferFlowState> {
@@ -95,14 +96,36 @@ class TransferFlowCubit extends Cubit<TransferFlowState> {
 
 
   void stepChanged(TransferStep targetStep) {
-    if (targetStep.index > state.step.index) {
+    if (targetStep == state.step) return;
 
-      nextStep();
+    if (targetStep.index > state.step.index) {
+      while (state.step.index < targetStep.index) {
+        final advanced = nextStep();
+        if (!advanced) return;
+      }
       return;
     }
+
     emit(state.copyWith(step: targetStep, clearMessage: true));
   }
 
+
+  void restoreFlow({
+    required TransferStep step,
+    required String sendAmount,
+    required String recipientName,
+    required String recipientAccount,
+  }) {
+    emit(
+      state.copyWith(
+        step: step,
+        sendAmount: sendAmount,
+        recipientName: recipientName,
+        recipientAccount: recipientAccount,
+        clearMessage: true,
+      ),
+    );
+  }
 
   Future<void> reviewAndSend() async {
     final amountError = validateAmount(state.sendAmount);
@@ -133,6 +156,10 @@ class TransferFlowCubit extends Cubit<TransferFlowState> {
     await Future<void>.delayed(const Duration(milliseconds: 1400));
 
     if (isClosed) return;
+
+    // Mock securely storing a transaction ID
+    final txId = 'tx_${DateTime.now().millisecondsSinceEpoch}';
+    await sl<FlutterSecureStorage>().write(key: 'last_tx_id', value: txId);
 
     emit(TransferFlowSuccess(
       step: TransferStep.review,

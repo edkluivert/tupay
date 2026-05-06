@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tupay/core/injections/injection.dart';
+import 'package:tupay/core/services/current_user_service.dart';
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -66,25 +68,33 @@ sealed class TransferFlowState {
 
   static const double transparentFee = 0;
 
-  static const double availableBalance = 12450;
-
-  static const List<PaymentMethodOption> paymentMethods = [
-    PaymentMethodOption(
-      type: PaymentMethodType.tupayBalance,
-      title: 'Tupay Balance',
-      subtitle: r'$12,450.00 available',
-    ),
-    PaymentMethodOption(
-      type: PaymentMethodType.applePay,
-      title: 'Apple Pay',
-      subtitle: 'Instant processing',
-    ),
-    PaymentMethodOption(
-      type: PaymentMethodType.googlePay,
-      title: 'Google Pay',
-      subtitle: 'Secure checkout',
-    ),
-  ];
+  static double get availableBalance {
+    final user = sl<CurrentUserService>().currentUser;
+    if (user == null) return 0.0;
+    return double.tryParse(user.totalBalance.replaceAll(',', '')) ?? 0.0;
+  }
+  static List<PaymentMethodOption> get paymentMethods {
+    final balance = availableBalance;
+    final formattedBalance = _formatAmount(balance);
+    
+    return [
+      PaymentMethodOption(
+        type: PaymentMethodType.tupayBalance,
+        title: 'Tupay Balance',
+        subtitle: '\$$formattedBalance available',
+      ),
+      const PaymentMethodOption(
+        type: PaymentMethodType.applePay,
+        title: 'Apple Pay',
+        subtitle: 'Instant processing',
+      ),
+      const PaymentMethodOption(
+        type: PaymentMethodType.googlePay,
+        title: 'Google Pay',
+        subtitle: 'Secure checkout',
+      ),
+    ];
+  }
 
   static const List<MockContact> contacts = [
     MockContact(

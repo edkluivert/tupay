@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:tupay/core/handlers/shared_preferences_wrapper.dart' as _i761;
 import 'package:tupay/core/injections/register_module.dart' as _i574;
 import 'package:tupay/core/navigation/navigation_service.dart' as _i675;
+import 'package:tupay/core/services/current_user_service.dart' as _i570;
 import 'package:tupay/features/app_bottom_nav/presentation/state_manager/app_bottom_nav_cubit.dart'
     as _i643;
 import 'package:tupay/features/auth/presentation/state_manager/auth/auth_bloc.dart'
@@ -35,6 +36,9 @@ Future<_i174.GetIt> init(
   );
   gh.lazySingleton<_i558.FlutterSecureStorage>(
     () => registerModule.flutterSecureStorage,
+  );
+  gh.lazySingleton<_i570.CurrentUserService>(
+    () => registerModule.currentUserService,
   );
   gh.lazySingleton<_i675.NavigationService>(() => _i675.NavigationService());
   gh.lazySingleton<_i643.AppBottomNavCubit>(() => _i643.AppBottomNavCubit());

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:tupay/features/auth/domain/models/user_model.dart';
 
 sealed class ProfileState {}
 
@@ -29,20 +30,3 @@ final class ProfileError extends ProfileState {
   final String message;
 }
 
-class LinkedPaymentMethod {
-  const LinkedPaymentMethod({
-    required this.bankName,
-    required this.type,
-    required this.maskedNumber,
-    required this.initials,
-    required this.isDefault,
-    required this.bankColor,
-  });
-
-  final String bankName;
-  final String type;
-  final String maskedNumber;
-  final String initials;
-  final bool isDefault;
-  final Color bankColor;
-}

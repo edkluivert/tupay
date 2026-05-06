@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:tupay/common/widgets/bouncing_clickable.dart';
-import 'package:tupay/common/widgets/clickable_widget.dart';
 import 'package:tupay/common/widgets/custom_dropdown.dart';
-import 'package:tupay/core/extensions/other_extensions.dart';
+import 'package:tupay/core/handlers/shared_preferences_wrapper.dart';
 import 'package:tupay/core/injections/injection.dart';
 import 'package:tupay/features/auth/presentation/state_manager/sign_up/sign_up_cubit.dart';
 import 'package:tupay/features/auth/presentation/state_manager/sign_up/sign_up_state.dart';
@@ -65,6 +62,13 @@ class _SignupViewState extends State<_SignupView> {
     );
   }
 
+  void onSignUpSuccess(){
+    sl<SharedPreferencesWrapper>().setString(SharedPrefsKey.firstTimer,
+        'first_timer');
+
+    sl<NavigationService>().removeAllAndNavigateTo(Routes.appBottomNav);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SignupCubit, SignupState>(
@@ -82,6 +86,7 @@ class _SignupViewState extends State<_SignupView> {
             message: state.message ?? 'Account created!',
           );
 
+         onSignUpSuccess();
         }
       },
       builder: (context, state) {

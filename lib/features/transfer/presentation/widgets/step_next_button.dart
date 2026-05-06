@@ -2,7 +2,11 @@ import 'package:tupay/features/features.dart';
 
 
 class StepNextButton extends StatelessWidget {
-  const StepNextButton({required this.label, required this.onTap});
+  const StepNextButton({
+    required this.label,
+    required this.onTap,
+     super.key,
+  });
 
   final String label;
   final VoidCallback onTap;

@@ -1,18 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tupay/core/constants/mock_data.dart';
+import 'package:tupay/core/injections/injection.dart';
+import 'package:tupay/core/services/current_user_service.dart';
 import 'package:tupay/features/auth/presentation/state_manager/sign_up/sign_up_state.dart';
-
-
 
 class SignupCubit extends Cubit<SignupState> {
   SignupCubit() : super(SignupInitial());
-
-  static const Map<String, String> _allowedCredentials = {
-    'john@tupay.test': 'Password123!',
-    'demo@tupay.test': 'Demo123!',
-    'mary@tupay.test': 'Tupay123!',
-  };
 
   void countryChanged(SignupCountry country) {
     emit(
@@ -55,18 +50,34 @@ class SignupCubit extends Cubit<SignupState> {
 
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
-    final expectedPassword = _allowedCredentials[normalizedEmail];
-
-    if (expectedPassword == null || expectedPassword != password) {
+    if (MockData.emailExists(normalizedEmail)) {
       emit(
         SignupFailure(
           selectedCountry: state.selectedCountry,
-          message:
-          'Invalid mock credentials. Try john@tupay.test / Password123!',
+          message: 'An account with this email already exists.',
         ),
       );
       return;
     }
+
+    if (MockData.phoneExists(normalizedPhone)) {
+      emit(
+        SignupFailure(
+          selectedCountry: state.selectedCountry,
+          message: 'An account with this phone number already exists.',
+        ),
+      );
+      return;
+    }
+
+    final user = MockData.createUser(
+      fullName: normalizedName,
+      email: normalizedEmail,
+      phone: normalizedPhone,
+      password: password,
+    );
+
+    sl<CurrentUserService>().currentUser = user;
 
     emit(
       SignupSuccess(
@@ -116,8 +127,8 @@ class SignupCubit extends Cubit<SignupState> {
     }
 
     final hasMinLength = password.length >= 8;
-    final hasUppercase = RegExp(r'[A-Z]').hasMatch(password);
-    final hasLowercase = RegExp(r'[a-z]').hasMatch(password);
+    final hasUppercase = RegExp('[A-Z]').hasMatch(password);
+    final hasLowercase = RegExp('[a-z]').hasMatch(password);
     final hasNumber = RegExp(r'\d').hasMatch(password);
     final hasSymbol = RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+=]').hasMatch(password);
 

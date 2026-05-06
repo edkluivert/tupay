@@ -13,7 +13,7 @@ import 'package:tupay/features/transfer/presentation/widgets/contacts_sheet.dart
 import 'package:tupay/features/transfer/presentation/widgets/transfer_app_bar.dart';
 import 'package:tupay/features/transfer/presentation/widgets/transfer_stepper.dart';
 
-// ─── Entry point ──────────────────────────────────────────────────────────────
+
 
 class TransferFlowScreen extends StatelessWidget {
   const TransferFlowScreen({super.key});
@@ -27,7 +27,6 @@ class TransferFlowScreen extends StatelessWidget {
   }
 }
 
-// ─── Root view ────────────────────────────────────────────────────────────────
 
 class _TransferFlowView extends StatefulWidget {
   const _TransferFlowView();
@@ -36,16 +35,89 @@ class _TransferFlowView extends StatefulWidget {
   State<_TransferFlowView> createState() => _TransferFlowViewState();
 }
 
-class _TransferFlowViewState extends State<_TransferFlowView> {
-  final _formKey = GlobalKey<FormState>();
-  final _pageController = PageController();
+/// State Restoration:
+/// We mix in [RestorationMixin] so Flutter's RestorationManager can
+/// serialize and restore these properties when the OS kills the app
+/// in the background while the user is mid-payment.
 
-  final _amountController = TextEditingController(text: '1000');
-  final _recipientNameController = TextEditingController();
-  final _recipientAccountController = TextEditingController();
+/// Each [RestorableString] / [RestorableInt] is registered with a unique
+/// restoration ID so the engine can persist them automatically —
+/// no shared_preferences or manual writes needed.
+
+class _TransferFlowViewState extends State<_TransferFlowView>
+    with RestorationMixin {
+  final _formKey = GlobalKey<FormState>();
+  late final PageController _pageController;
+
+  final _stepIndex = RestorableInt(0);
+  final _sendAmount = RestorableString('1000');
+  final _recipientName = RestorableString('');
+  final _recipientAccount = RestorableString('');
+
+
+  late final TextEditingController _amountController;
+  late final TextEditingController _recipientNameController;
+  late final TextEditingController _recipientAccountController;
+
+  @override
+  String get restorationId => 'transfer_flow_view';
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Do NOT read _stepIndex.value or _sendAmount.value here.
+    // Restorable values are not registered yet in initState.
+    _pageController = PageController(initialPage: 0);
+
+    _amountController = TextEditingController(text: '1000');
+    _recipientNameController = TextEditingController();
+    _recipientAccountController = TextEditingController();
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_stepIndex, 'step_index');
+    registerForRestoration(_sendAmount, 'send_amount');
+    registerForRestoration(_recipientName, 'recipient_name');
+    registerForRestoration(_recipientAccount, 'recipient_account');
+
+    final safeStepIndex = _stepIndex.value.clamp(
+      0,
+      TransferStep.values.length - 1,
+    );
+
+    final restoredStep = TransferStep.values[safeStepIndex];
+
+    _amountController.text = _sendAmount.value;
+    _recipientNameController.text = _recipientName.value;
+    _recipientAccountController.text = _recipientAccount.value;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final cubit = context.read<TransferFlowCubit>()
+
+      ..restoreFlow(
+        step: restoredStep,
+        sendAmount: _sendAmount.value,
+        recipientName: _recipientName.value,
+        recipientAccount: _recipientAccount.value,
+      );
+
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(restoredStep.index);
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _stepIndex.dispose();
+    _sendAmount.dispose();
+    _recipientName.dispose();
+    _recipientAccount.dispose();
     _pageController.dispose();
     _amountController.dispose();
     _recipientNameController.dispose();
@@ -107,6 +179,12 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
   Widget build(BuildContext context) {
     return BlocConsumer<TransferFlowCubit, TransferFlowState>(
       listener: (context, state) {
+
+        _stepIndex.value = state.step.index;
+        _sendAmount.value = state.sendAmount;
+        _recipientName.value = state.recipientName;
+        _recipientAccount.value = state.recipientAccount;
+
         if (state.isFailure) {
           AppSnackBar.showFailure(
             context,
@@ -135,7 +213,6 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
             body: SafeArea(
               child: Column(
                 children: [
-
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.pagePadding,
@@ -155,8 +232,7 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
                         .slideY(begin: 0.18, end: 0, duration: 360.ms, curve: Curves.easeOutCubic),
                   ),
 
-                  const SizedBox(height: 20),
-
+                  context.uiHelper.verticalSpace(20),
 
                   Expanded(
                     child: Form(
@@ -166,7 +242,6 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
                         controller: _pageController,
                         physics: const NeverScrollableScrollPhysics(),
                         children: [
-
                           AmountView(
                             state: state,
                             amountController: _amountController,
@@ -176,8 +251,7 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
                             onNext: () => _handleNext(context),
                           ),
 
-
-                         RecipientView(
+                          RecipientView(
                             state: state,
                             nameController: _recipientNameController,
                             accountController: _recipientAccountController,
@@ -189,7 +263,6 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
                             onNext: () => _handleNext(context),
                             onBack: () => _handleBack(context),
                           ),
-
 
                           ReviewView(
                             state: state,
@@ -209,12 +282,3 @@ class _TransferFlowViewState extends State<_TransferFlowView> {
     );
   }
 }
-
-
-
-
-
-
-
-
-

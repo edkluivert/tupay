@@ -5,6 +5,7 @@ import 'package:tupay/features/features.dart';
 import 'package:tupay/features/home/presentation/widgets/dashboard_app_bar.dart';
 import 'package:tupay/features/profile/presentation/state_manager/profile_cubit.dart';
 import 'package:tupay/features/profile/presentation/state_manager/profile_state.dart';
+import 'package:tupay/features/profile/presentation/widgets/log_out_dialog.dart';
 import 'package:tupay/features/profile/presentation/widgets/menu_card.dart';
 import 'package:tupay/features/profile/presentation/widgets/profile_card.dart';
 
@@ -78,6 +79,10 @@ class _SuccessBody extends StatelessWidget {
               BouncyClickableWidget(
                 onTap: (){
 
+                  showDialog<void>
+                    (context: context, builder: (c){
+                    return const LogOutDialog();
+                  });
                 },
                 backgroundColor: AppColors.redLight.withValues(alpha: 0.1),
                 borderRadius: 12,
